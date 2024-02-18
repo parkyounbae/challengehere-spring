@@ -1,6 +1,7 @@
 package com.parkyounbae.challengehere.service;
 
 import com.parkyounbae.challengehere.domain.challenge.*;
+import com.parkyounbae.challengehere.domain.post.Like;
 import com.parkyounbae.challengehere.domain.post.Post;
 import com.parkyounbae.challengehere.domain.user.User;
 import com.parkyounbae.challengehere.dto.challenge.*;
@@ -9,10 +10,12 @@ import com.parkyounbae.challengehere.dto.home.GetHomeResponse;
 import com.parkyounbae.challengehere.dto.home.HomeChallengeData;
 import com.parkyounbae.challengehere.dto.home.PostValidateChallengeRequest;
 import com.parkyounbae.challengehere.repository.interfaces.challenge.*;
+import com.parkyounbae.challengehere.repository.interfaces.post.LikeRepository;
 import com.parkyounbae.challengehere.repository.interfaces.post.PostRepository;
 import com.parkyounbae.challengehere.repository.interfaces.user.FriendshipRepository;
 import com.parkyounbae.challengehere.repository.interfaces.user.UserRepository;
 //import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +25,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.apache.tomcat.util.http.FastHttpDateFormat.getCurrentDate;
-
 @Service
-//@Transactional
+@Transactional
 public class ChallengeService {
     private final UserRepository userRepository;
     private final ChallengeRepository challengeRepository;
@@ -34,6 +35,7 @@ public class ChallengeService {
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengePositionRepository challengePositionRepository;
     private final PostRepository postRepository;
+    private final LikeRepository likeRepository;
     private final DailyUpdateService dailyUpdateService;
 
     @Autowired
@@ -45,6 +47,7 @@ public class ChallengeService {
                             ChallengeParticipantRepository challengeParticipantRepository,
                             ChallengePositionRepository challengePositionRepository,
                             PostRepository postRepository,
+                            LikeRepository likeRepository,
                             DailyUpdateService dailyUpdateService
     ) {
         this.userRepository = userRepository;
@@ -54,6 +57,7 @@ public class ChallengeService {
         this.challengeSuccessRepository = challengeSuccessRepository;
         this.challengePositionRepository = challengePositionRepository;
         this.postRepository = postRepository;
+        this.likeRepository = likeRepository;
         this.dailyUpdateService = dailyUpdateService;
     }
 
@@ -77,6 +81,7 @@ public class ChallengeService {
         challenge.setName(postAddChallengeRequest.getName());
         challenge.setPower(0.0);
         challenge.setNotification("공지사항");
+        challenge.setOwnerId(postAddChallengeRequest.getUserId());
         Challenge newChallenge = challengeRepository.save(challenge);
 
         // ChallengeInvitationRepo
@@ -112,7 +117,7 @@ public class ChallengeService {
     public List<GetChallengeListResponse> getChallengeListResponse(Long userId) {
         List<GetChallengeListResponse> getChallengeListResponseList = new ArrayList<>();
 
-        List<ChallengeParticipant> myChallenge = challengeParticipantRepository.findBuUserId(userId);
+        List<ChallengeParticipant> myChallenge = challengeParticipantRepository.findByUserId(userId);
 
         for (ChallengeParticipant c : myChallenge) {
             GetChallengeListResponse temp = new GetChallengeListResponse();
@@ -167,7 +172,7 @@ public class ChallengeService {
         challengeResponse.setChallengePower(challengeResponse.getChallengePower());
 
 //        private List<String> todaySuccessParticipant;
-        List<Long> todaySuccessUserIdList = challengeSuccessRepository.findByChallengeIdAndDate(challengeId, dailyUpdateService.getCurrentDateString());
+        List<Long> todaySuccessUserIdList = challengeSuccessRepository.findUserIdsByChallengeIdAndDate(challengeId, dailyUpdateService.getCurrentDateString());
         List<String> todaySuccessNameList = new ArrayList<>();
 
         for (Long id : todaySuccessUserIdList) {
@@ -290,7 +295,7 @@ public class ChallengeService {
         List<ChallengeSuccess> challengeSuccesses = challengeSuccessRepository.findByUserId(userId);
         List<CircleData> circleDataList = new ArrayList<>();
 
-        List<ChallengeParticipant> challengeParticipantList = challengeParticipantRepository.findBuUserId(userId);
+        List<ChallengeParticipant> challengeParticipantList = challengeParticipantRepository.findByUserId(userId);
 
         System.out.println("my challenge count : " + challengeParticipantList.size());
 
@@ -348,7 +353,7 @@ public class ChallengeService {
 
             // 챌린지 성공 여부
 
-            homeChallengeData.setIsSuccess(challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, dailyUpdateService.getCurrentDateString()));
+            homeChallengeData.setIsSuccess(challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, dailyUpdateService.getCurrentDateString()).isPresent());
 
             homeChallengeDataList.add(homeChallengeData);
         }
@@ -362,5 +367,150 @@ public class ChallengeService {
 
     }
 
+    // 챌린지 업데이트 하기
+    public void updateChallenge(PostAddChallengeRequest postAddChallengeRequest, Long challengeId) {
+        // 커버
+        // 이름
+        Optional<Challenge> optionalChallenge = challengeRepository.findById(challengeId);
+        if (optionalChallenge.isPresent()) {
+            Challenge newChallenge = optionalChallenge.get();
 
+            newChallenge.setCoverPath(postAddChallengeRequest.getCover());
+            newChallenge.setName(postAddChallengeRequest.getName());
+
+            challengeRepository.save(newChallenge); // 여기서 챌린지 아이디가 잘 저장 되는지? // todo
+        }
+
+        // 챌린지 위치
+        challengePositionRepository.deleteByChallengeId(challengeId);
+        for(Position position : postAddChallengeRequest.getPosition()) {
+            // position.x, position.y, position.name
+            // challengePosition.xPosition, challengePosition.yPosition, challengePosition.positionName
+            ChallengePosition challengePosition = new ChallengePosition();
+
+            challengePosition.setChallengeId(challengeId);
+            challengePosition.setXPosition(position.getX());
+            challengePosition.setYPosition(position.getY());
+            challengePosition.setPositionName(position.getName());
+
+            challengePositionRepository.save(challengePosition);
+        }
+
+        // 챌린지 참여자
+//        List<ChallengeParticipant> challengeParticipantList = challengeParticipantRepository.findByChallengeId(challengeId);
+//        for(Participant participant : postAddChallengeRequest.getParticipant()) {
+//            // 각 participant.userId 가 challengeParticipantList의 ChallengeParticipant.userId에 없는 경우
+//        }
+
+        // 챌린지 참여자 업데이트
+        List<ChallengeParticipant> existingParticipants = challengeParticipantRepository.findByChallengeId(challengeId);
+        List<Long> existingParticipantIds = existingParticipants.stream()
+                .map(ChallengeParticipant::getUserId)
+                .collect(Collectors.toList());
+
+        // 새로운 참여자 ID 목록
+        List<Long> newParticipantIds = postAddChallengeRequest.getParticipant().stream()
+                .map(Participant::getId)
+                .collect(Collectors.toList());
+
+        // 삭제할 참여자 찾기: 기존 목록에 있지만 새 목록에 없는 참여자
+        List<ChallengeParticipant> participantsToDelete = existingParticipants.stream()
+                .filter(participant -> !newParticipantIds.contains(participant.getUserId()))
+                .collect(Collectors.toList());
+
+        // 참여자 삭제
+        for (ChallengeParticipant participantToDelete : participantsToDelete) {
+            challengeParticipantRepository.deleteById(participantToDelete.getId());
+        }
+
+        // 새로운 참여자 추가: 새 목록에는 있지만 기존 목록에 없는 참여자
+        for (Long newParticipantId : newParticipantIds) {
+            if (!existingParticipantIds.contains(newParticipantId)) {
+                // 새 참여자 추가
+                ChallengeInvitation challengeInvitation = new ChallengeInvitation();
+                challengeInvitation.setChallengeId(challengeId);
+                challengeInvitation.setReceiveId(newParticipantId);
+                challengeInvitation.setStatus(0);
+
+                challengeInvitationRepository.save(challengeInvitation);
+            }
+        }
+
+    }
+
+    // 챌린지 삭제하기
+    public void deleteChallenge(Long challengeId) {
+        challengeRepository.deleteById(challengeId);
+
+        challengePositionRepository.deleteByChallengeId(challengeId);
+        challengeParticipantRepository.deleteByChallengeId(challengeId);
+
+
+        List<Post> postList = postRepository.findByChallengeId(challengeId);
+        for(Post p : postList) {
+            List<Like> likeList = likeRepository.findByPostId(p.getId());
+            for(Like like : likeList) {
+                likeRepository.deleteById(like.getId());
+            }
+        }
+        postRepository.deleteByChallengeId(challengeId);
+    }
+
+    // 챌린지 떠나기
+    public void leaveChallenge(Long challengeId, Long userId) {
+        ChallengeParticipant challengeParticipant = challengeParticipantRepository.findByUserIdAndChallengeId(userId, challengeId);
+        challengeParticipantRepository.deleteById(challengeParticipant.getId());
+    }
+
+    // 챌린지 수정화면 데이터
+    public PostAddChallengeRequest getChallengeModifyResponse(Long challengeId) {
+        PostAddChallengeRequest postAddChallengeRequest = new PostAddChallengeRequest();
+
+        // 이름
+        // 커버
+        // 소유주
+        Optional<Challenge> optionalChallenge = challengeRepository.findById(challengeId);
+
+        if(optionalChallenge.isPresent()) {
+            Challenge challenge = optionalChallenge.get();
+
+            postAddChallengeRequest.setName(challenge.getName());
+            postAddChallengeRequest.setCover(challenge.getCoverPath());
+            postAddChallengeRequest.setUserId(challenge.getOwnerId());
+        }
+
+        // 위치
+        List<ChallengePosition> challengePositionList = challengePositionRepository.findByChallengeId(challengeId);
+        List<Position> positionList = new ArrayList<>();
+        for(ChallengePosition challengePosition : challengePositionList) {
+            Position position = new Position();
+            position.setName(challengePosition.getPositionName());
+            position.setX(challengePosition.getXPosition());
+            position.setY(challengePosition.getYPosition());
+
+            positionList.add(position);
+        }
+        postAddChallengeRequest.setPosition(positionList);
+
+        // 참여자
+        List<ChallengeParticipant> challengeParticipantList = challengeParticipantRepository.findByChallengeId(challengeId);
+        List<Participant> participantList = new ArrayList<>();
+        for(ChallengeParticipant challengeParticipant : challengeParticipantList) {
+            Participant participant = new Participant();
+            participant.setId(challengeParticipant.getUserId());
+
+            Optional<User> optionalUser = userRepository.findById(challengeParticipant.getUserId());
+
+            if(optionalUser.isPresent()) {
+                participant.setName(optionalUser.get().getName());
+            } else {
+                participant.setName("알수없음");
+            }
+
+            participantList.add(participant);
+        }
+        postAddChallengeRequest.setParticipant(participantList);
+
+        return postAddChallengeRequest;
+    }
 }

@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @PostMapping("/user/login")
-    public ResponseEntity<String> loginUser(@RequestParam("token") String token, @RequestParam("provider") String provider) {
+    public ResponseEntity<User> loginUser(@RequestParam("token") String token, @RequestParam("provider") String provider) {
         logger.info("login requet : "+token+" " + provider);
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
@@ -77,11 +77,16 @@ public class UserController {
 
         if(user.isPresent()) {
             logger.info("exist");
-            return new ResponseEntity<>(user.get().getId().toString(), HttpStatus.OK);
+            return new ResponseEntity<>(user.get(), HttpStatus.OK);
             // return user.get().getId();
         } else {
             logger.info("no exist");
-            return new ResponseEntity<>(userGoogleId, HttpStatus.NOT_FOUND);
+            User dummyUser = new User();
+            dummyUser.setName("");
+            dummyUser.setId(0L);
+            dummyUser.setProvider("");
+            dummyUser.setProviderId(userGoogleId);
+            return new ResponseEntity<>(dummyUser, HttpStatus.NOT_FOUND);
             // return 0L;
         }
     }

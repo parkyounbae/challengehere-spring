@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,5 +35,11 @@ public class FriendController {
     @GetMapping("/friend/search")
     public List<GetFriendSearchResultResponse> getFriendSearchResultResponses(@RequestHeader("user_id") String user_id, @RequestHeader("name") String name) {
         return friendService.searchFriend(Long.parseLong(user_id), name);
+    }
+
+    @DeleteMapping("/friend")
+    public ResponseEntity<Void> deleteFriend(@RequestHeader("user_id") String user_id, @RequestHeader("friend_id") String friend_id) {
+        friendService.deleteFriend(Long.parseLong(user_id), Long.parseLong(friend_id));
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

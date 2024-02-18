@@ -12,9 +12,9 @@ public interface PostPhotoRepository {
 
     Optional<PostPhoto> findById(Long id);
 
-    List<PostPhoto> findBuPostId(Long id);
+    List<PostPhoto> findByPostId(Long id);
 
-    void updateById(Long id, PostPhoto postPhoto);
+    // void updateById(Long id, PostPhoto postPhoto);
 
     void deleteById(Long id);
 }

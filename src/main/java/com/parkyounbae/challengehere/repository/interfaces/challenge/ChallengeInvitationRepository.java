@@ -12,11 +12,11 @@ public interface ChallengeInvitationRepository {
 
     Optional<ChallengeInvitation> findById(Long id);
 
-    List<ChallengeInvitation> findByUserId(Long id); // 친구거나 요청보낸 사람 반환
+    List<ChallengeInvitation> findByReceiveId(Long receiveId); // 친구거나 요청보낸 사람 반환
 
     Optional<ChallengeInvitation> findByChallengeIdAndReceiveId(Long challengeId, Long receiveId);
 
-    void updateById(Long id, ChallengeInvitation challengeInvitation); // 수락했을 때
+    // void updateById(Long id, ChallengeInvitation challengeInvitation); // 수락했을 때
 
     void deleteById(Long Id); // 거절했을 때
 

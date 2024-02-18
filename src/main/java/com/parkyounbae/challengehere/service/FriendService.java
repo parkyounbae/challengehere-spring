@@ -12,6 +12,7 @@ import com.parkyounbae.challengehere.repository.interfaces.challenge.ChallengeSu
 import com.parkyounbae.challengehere.repository.interfaces.user.FriendshipRepository;
 import com.parkyounbae.challengehere.repository.interfaces.user.UserRepository;
 //import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-//@Transactional
+@Transactional
 public class FriendService {
 
     private final FriendshipRepository friendshipRepository;
@@ -49,8 +50,10 @@ public class FriendService {
 
             Optional<User> tempUser = userRepository.findById(friendId);
             if(tempUser.isPresent()) {
+                tempCommitResponseData.setId(tempUser.get().getId());
                 tempCommitResponseData.setName(tempUser.get().getName());
             } else {
+                tempCommitResponseData.setId(0L);
                 tempCommitResponseData.setName("알수없음");
             }
 
@@ -119,5 +122,16 @@ public class FriendService {
         }
 
         return getFriendSearchResultResponses;
+    }
+
+    public void deleteFriend(Long userId, Long friendId) {
+        List<Friendship> myFriends = friendshipRepository.findMyFriends(userId);
+
+        for(Friendship f :myFriends) {
+            if(f.getReceiveId().equals(friendId) || f.getRequestId().equals(friendId)) {
+                friendshipRepository.deleteById(f.getId());
+                break;
+            }
+        }
     }
 }

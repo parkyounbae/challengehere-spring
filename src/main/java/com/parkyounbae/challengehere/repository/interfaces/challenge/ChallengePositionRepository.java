@@ -12,7 +12,7 @@ public interface ChallengePositionRepository {
 
     List<ChallengePosition> findByChallengeId(Long challengeId);
 
-    void updateById(Long id, ChallengePosition challengePosition);
+    // void updateById(Long id, ChallengePosition challengePosition);
 
     void deleteById(Long id);
 

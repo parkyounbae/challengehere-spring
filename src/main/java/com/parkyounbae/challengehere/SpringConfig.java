@@ -77,7 +77,8 @@ public class SpringConfig {
                  challengeInvitationRepository,
                  challengeParticipantRepository,
                  challengePositionRepository,
-                 postRepository,dailyUpdateService);
+                 postRepository,likeRepository,dailyUpdateService
+                );
     }
 
     @Bean

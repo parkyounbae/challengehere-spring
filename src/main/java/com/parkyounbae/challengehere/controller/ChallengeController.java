@@ -52,10 +52,30 @@ public class ChallengeController {
         return challengeService.validateChallenge(postValidateChallengeRequest);
     }
 
+    // 챌린지 업데이트 하기
+    @PostMapping("/challenge/update")
+    public ResponseEntity<Void> postUpdateChallenge(@RequestBody PostAddChallengeRequest postAddChallengeRequest, @RequestHeader("challenge_id") String challenge_id) {
+        challengeService.updateChallenge(postAddChallengeRequest, Long.parseLong(challenge_id));
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
+    // 챌린지 삭제하기
+    @DeleteMapping("/challenge/{challengeId}")
+    public ResponseEntity<Void> deleteChallenge(@PathVariable("challengeId") String challengeId) {
+        challengeService.deleteChallenge(Long.parseLong(challengeId));
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
+    // 챌린지 떠나기
+    @PostMapping("/challenge/leave")
+    public ResponseEntity<Void> leaveChallenge(@RequestHeader("challenge_id") String challenge_id, @RequestHeader("user_id") String user_id) {
+        challengeService.leaveChallenge(Long.parseLong(challenge_id), Long.parseLong(user_id));
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
-
-
-
+    // 챌린지 수정화면 데이터 불러오기
+    @GetMapping("/challenge/update")
+    public PostAddChallengeRequest getChallengeUpdate(@RequestHeader("challenge_id") String challenge_id) {
+        return challengeService.getChallengeModifyResponse(Long.parseLong(challenge_id));
+    }
 }

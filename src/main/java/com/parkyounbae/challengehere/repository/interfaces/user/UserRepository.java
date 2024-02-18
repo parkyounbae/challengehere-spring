@@ -1,7 +1,6 @@
 package com.parkyounbae.challengehere.repository.interfaces.user;
 
 import com.parkyounbae.challengehere.domain.user.User;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +13,7 @@ public interface UserRepository {
 
     Optional<User> findByName(String name);
 
-    Optional<User> findByProviderId(String provider, String providerId);
+    Optional<User> findByProviderAndProviderId(String provider, String providerId);
 
     void deleteById(Long id);
 

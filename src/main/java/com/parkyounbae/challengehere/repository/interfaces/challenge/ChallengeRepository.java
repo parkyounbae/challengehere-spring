@@ -11,7 +11,7 @@ public interface ChallengeRepository {
 
     Optional<Challenge> findById(Long id);
 
-    void updateById(Long id, Challenge challenge);
+    // void updateById(Long id, Challenge challenge);
 
     void deleteById(Long id);
 }

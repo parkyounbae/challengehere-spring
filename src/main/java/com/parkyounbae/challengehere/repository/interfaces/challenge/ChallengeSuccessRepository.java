@@ -4,6 +4,7 @@ import com.parkyounbae.challengehere.domain.challenge.ChallengeSuccess;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ChallengeSuccessRepository {
@@ -15,9 +16,9 @@ public interface ChallengeSuccessRepository {
 
     List<ChallengeSuccess> findByUserIdAndChallengeId(Long userId, Long challengeId);
 
-    Boolean findByChallengeIdAndUserIdAndDate(Long challengeId, Long UserId, String date);
+    Optional<ChallengeSuccess> findByChallengeIdAndUserIdAndDate(Long challengeId, Long UserId, String date);
 
-    List<Long> findByChallengeIdAndDate(Long challengeId, String date);
+    List<Long> findUserIdsByChallengeIdAndDate(Long challengeId, String date);
 
     void deleteByUserId(Long userId);
 }

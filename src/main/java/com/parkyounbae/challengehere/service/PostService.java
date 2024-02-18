@@ -11,6 +11,7 @@ import com.parkyounbae.challengehere.repository.interfaces.post.PostPhotoReposit
 import com.parkyounbae.challengehere.repository.interfaces.post.PostRepository;
 import com.parkyounbae.challengehere.repository.interfaces.user.UserRepository;
 //import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-//@Transactional
+@Transactional
 public class PostService {
 
     private final PostRepository postRepository;
@@ -80,7 +81,7 @@ public class PostService {
             }
 
             // 이미지
-            List<PostPhoto> postPhotoList = postPhotoRepository.findBuPostId(post.getId());
+            List<PostPhoto> postPhotoList = postPhotoRepository.findByPostId(post.getId());
             List<String> photoListPathList = new ArrayList<>();
 
             for(PostPhoto p : postPhotoList) {

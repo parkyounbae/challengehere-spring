@@ -14,7 +14,9 @@ public interface PostRepository {
 
     List<Post> findByChallengeId(Long id);
 
-    void updateById(Long id, Post post);
+    // void updateById(Long id, Post post);
 
     void deleteById(Long id);
+
+    void deleteByChallengeId(Long challengeId);
 }

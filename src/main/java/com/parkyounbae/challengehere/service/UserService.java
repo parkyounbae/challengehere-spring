@@ -13,6 +13,8 @@ import com.parkyounbae.challengehere.repository.interfaces.challenge.*;
 import com.parkyounbae.challengehere.repository.interfaces.user.FriendshipRepository;
 import com.parkyounbae.challengehere.repository.interfaces.user.UserRepository;
 //import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-//@Transactional
+@Transactional
 public class UserService {
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
@@ -71,7 +73,7 @@ public class UserService {
 
     // 소셜 로그인 : UserRepo
     public Optional<User> login(String providerToken,String provider) {
-        return userRepository.findByProviderId(provider, providerToken);
+        return userRepository.findByProviderAndProviderId(provider, providerToken);
     }
 
     // 회원 탈퇴하기
@@ -95,7 +97,7 @@ public class UserService {
     public List<GetAlertResponse> getAlertList(Long id) {
         List<GetAlertResponse> getAlertResponses = new ArrayList<GetAlertResponse>();
 
-        List<ChallengeInvitation> invitations = challengeInvitationRepository.findByUserId(id);
+        List<ChallengeInvitation> invitations = challengeInvitationRepository.findByReceiveId(id);
         List<Friendship> friendships = friendshipRepository.findByReceiveId(id);
 
         for(ChallengeInvitation c : invitations) {
@@ -140,15 +142,14 @@ public class UserService {
             Long requestId = postAlertResponse.getRequest_id();
             Long receiveId = postAlertResponse.getReceive_id();
 
-            Optional<Friendship> friendshipOptional = friendshipRepository.findByRequestIdAndReceiveId(receiveId, requestId);
+            Optional<Friendship> friendshipOptional = friendshipRepository.findByRequestIdAndReceiveId(requestId, receiveId);
 
             if(friendshipOptional.isPresent()) {
                 Friendship friendship = friendshipOptional.get();
                 if(postAlertResponse.getIs_accept()) {
                     // accept
                     System.out.println("accept");
-                    friendship.setStatus(1);
-                    friendshipRepository.updateById(friendship.getId(), friendship);
+                    updateStatusFriendById(friendship);
                 } else {
                     // reject
                     System.out.println("reject");
@@ -212,7 +213,7 @@ public class UserService {
         List<ChallengeSuccess> challengeSuccesses = challengeSuccessRepository.findByUserId(userId);
         List<CircleData> circleDataList = new ArrayList<>();
 
-        List<ChallengeParticipant> challengeParticipantList = challengeParticipantRepository.findBuUserId(userId);
+        List<ChallengeParticipant> challengeParticipantList = challengeParticipantRepository.findByUserId(userId);
 
         System.out.println("my challenge count : " + challengeParticipantList.size());
 
@@ -270,7 +271,7 @@ public class UserService {
 
             // 챌린지 성공 여부
 
-            homeChallengeData.setIsSuccess(challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, getCurrentDate()));
+            homeChallengeData.setIsSuccess(challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, getCurrentDate()).isPresent());
 
             homeChallengeDataList.add(homeChallengeData);
         }
@@ -280,5 +281,14 @@ public class UserService {
 
 
         return getHomeResponse;
+    }
+
+    public void updateStatusFriendById(Friendship friendship) {
+        // Friendship existingFriendship = friendshipRepository.findById(friendship.getId())
+
+        // Update fields of existingFriendship
+        friendship.setStatus(1);
+
+        friendshipRepository.save(friendship);
     }
 }

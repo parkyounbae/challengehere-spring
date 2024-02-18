@@ -9,11 +9,15 @@ import java.util.List;
 public interface ChallengeParticipantRepository {
     ChallengeParticipant save(ChallengeParticipant challengeParticipant);
 
-    List<ChallengeParticipant> findBuUserId(Long id);
+    List<ChallengeParticipant> findByUserId(Long userId);
 
     List<ChallengeParticipant> findByChallengeId(Long id);
+
+    ChallengeParticipant findByUserIdAndChallengeId(Long userId, Long challengeId);
 
     void deleteById(Long id);
 
     void deleteByUserId(Long id);
+
+    void deleteByChallengeId(Long id);
 }
