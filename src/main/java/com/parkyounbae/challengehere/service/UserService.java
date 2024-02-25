@@ -270,8 +270,18 @@ public class UserService {
             homeChallengeData.setChallengePositionY(dummyYList);
 
             // 챌린지 성공 여부
+            Optional<ChallengeSuccess> todaySuccessData = challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, dailyUpdateService.getCurrentDateString());
 
-            homeChallengeData.setIsSuccess(challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, dailyUpdateService.getCurrentDateString()).isPresent());
+            if(todaySuccessData.isPresent()) {
+                System.out.println("today date : " + dailyUpdateService.getCurrentDateString());
+                System.out.println("find date : " + todaySuccessData.get().getDate());
+                homeChallengeData.setIsSuccess(true);
+            } else {
+                System.out.println("can not find");
+                homeChallengeData.setIsSuccess(false);
+            }
+
+
 
             homeChallengeDataList.add(homeChallengeData);
         }
