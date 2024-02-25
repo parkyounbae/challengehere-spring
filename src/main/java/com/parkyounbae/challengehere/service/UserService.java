@@ -271,7 +271,7 @@ public class UserService {
 
             // 챌린지 성공 여부
 
-            homeChallengeData.setIsSuccess(challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, getCurrentDate()).isPresent());
+            homeChallengeData.setIsSuccess(challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, dailyUpdateService.getCurrentDateString()).isPresent());
 
             homeChallengeDataList.add(homeChallengeData);
         }

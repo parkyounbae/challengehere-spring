@@ -31,7 +31,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'com.google.api-client:google-api-client:1.32.1'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+<<<<<<< HEAD
 	runtimeOnly 'mysql:mysql-connector-java'
+=======
+	runtimeOnly 'com.mysql:mysql-connector-j'
+>>>>>>> 3792fd1dfb92baa3fd26c447c4ff207c043a4e2e
 }
 
 tasks.named('test') {
