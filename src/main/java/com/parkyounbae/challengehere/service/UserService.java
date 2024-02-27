@@ -54,10 +54,6 @@ public class UserService {
         this.dailyUpdateService = dailyUpdateService;
     }
 
-    public String getCurrentDate() {
-        return dailyUpdateService.getCurrentDateString();
-    }
-
     // 신규 회원 가입 : UserRepo
     public Long signUp(String name, String token, String provider) {
 

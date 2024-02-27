@@ -16,17 +16,14 @@ public class SpringConfig {
 
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
-
     private final PostRepository postRepository;
     private final PostPhotoRepository postPhotoRepository;
     private final LikeRepository likeRepository;
-
     private final ChallengeRepository challengeRepository;
     private final ChallengeInvitationRepository challengeInvitationRepository;
     private final ChallengePositionRepository challengePositionRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeSuccessRepository challengeSuccessRepository;
-
     private final DailyUpdateService dailyUpdateService;
 
 
@@ -89,6 +86,11 @@ public class SpringConfig {
     @Bean
     public FriendService friendService() {
         return new FriendService( friendshipRepository,  userRepository,  challengeRepository, challengeSuccessRepository);
+    }
+
+    @Bean
+    public DailyUpdateService dailyUpdateService() {
+        return new DailyUpdateService();
     }
 
 }
