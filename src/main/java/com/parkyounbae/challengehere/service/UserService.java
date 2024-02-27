@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +34,6 @@ public class UserService {
     private final ChallengeInvitationRepository challengeInvitationRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengePositionRepository challengePositionRepository;
-    private final DailyUpdateService dailyUpdateService;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -41,8 +42,7 @@ public class UserService {
                        ChallengeSuccessRepository challengeSuccessRepository,
                        ChallengeInvitationRepository challengeInvitationRepository,
                        ChallengeParticipantRepository challengeParticipantRepository,
-                       ChallengePositionRepository challengePositionRepository,
-                       DailyUpdateService dailyUpdateService
+                       ChallengePositionRepository challengePositionRepository
                        ) {
         this.userRepository = userRepository;
         this.challengeInvitationRepository = challengeInvitationRepository;
@@ -51,7 +51,6 @@ public class UserService {
         this.challengeSuccessRepository = challengeSuccessRepository;
         this.friendshipRepository = friendshipRepository;
         this.challengePositionRepository = challengePositionRepository;
-        this.dailyUpdateService = dailyUpdateService;
     }
 
     // 신규 회원 가입 : UserRepo
@@ -265,11 +264,15 @@ public class UserService {
             homeChallengeData.setChallengePositionX(dummyXList);
             homeChallengeData.setChallengePositionY(dummyYList);
 
+            LocalDate currentDate = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String currentDateString = currentDate.format(formatter);
+
             // 챌린지 성공 여부
-            Optional<ChallengeSuccess> todaySuccessData = challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, dailyUpdateService.getCurrentDateString());
+            Optional<ChallengeSuccess> todaySuccessData = challengeSuccessRepository.findByChallengeIdAndUserIdAndDate(c.getChallengeId(),userId, currentDateString);
 
             if(todaySuccessData.isPresent()) {
-                System.out.println("today date : " + dailyUpdateService.getCurrentDateString());
+                System.out.println("today date : " + currentDateString);
                 System.out.println("find date : " + todaySuccessData.get().getDate());
                 homeChallengeData.setIsSuccess(true);
             } else {

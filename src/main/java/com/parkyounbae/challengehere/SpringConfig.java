@@ -24,7 +24,6 @@ public class SpringConfig {
     private final ChallengePositionRepository challengePositionRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeSuccessRepository challengeSuccessRepository;
-    private final DailyUpdateService dailyUpdateService;
 
 
 
@@ -38,8 +37,7 @@ public class SpringConfig {
                         ChallengeInvitationRepository challengeInvitationRepository,
                         ChallengePositionRepository challengePositionRepository,
                         ChallengeParticipantRepository challengeParticipantRepository,
-                        ChallengeSuccessRepository challengeSuccessRepository,
-                        DailyUpdateService dailyUpdateService
+                        ChallengeSuccessRepository challengeSuccessRepository
                         ) {
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
@@ -51,7 +49,6 @@ public class SpringConfig {
         this.challengePositionRepository = challengePositionRepository;
         this.challengeParticipantRepository = challengeParticipantRepository;
         this.challengeSuccessRepository = challengeSuccessRepository;
-        this.dailyUpdateService = dailyUpdateService;
     }
 
     @Bean
@@ -62,7 +59,7 @@ public class SpringConfig {
                  challengeSuccessRepository,
                  challengeInvitationRepository,
                  challengeParticipantRepository,
-                 challengePositionRepository,dailyUpdateService);
+                 challengePositionRepository);
     }
 
     @Bean
@@ -74,23 +71,18 @@ public class SpringConfig {
                  challengeInvitationRepository,
                  challengeParticipantRepository,
                  challengePositionRepository,
-                 postRepository,likeRepository,dailyUpdateService
+                 postRepository,likeRepository
                 );
     }
 
     @Bean
     public PostService postService() {
-        return new PostService( postRepository,  postPhotoRepository,  likeRepository, userRepository,dailyUpdateService);
+        return new PostService( postRepository,  postPhotoRepository,  likeRepository, userRepository);
     }
 
     @Bean
     public FriendService friendService() {
         return new FriendService( friendshipRepository,  userRepository,  challengeRepository, challengeSuccessRepository);
-    }
-
-    @Bean
-    public DailyUpdateService dailyUpdateService() {
-        return new DailyUpdateService();
     }
 
 }

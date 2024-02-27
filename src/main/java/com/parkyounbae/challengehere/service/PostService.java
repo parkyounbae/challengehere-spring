@@ -15,6 +15,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,20 +29,15 @@ public class PostService {
     private final PostPhotoRepository postPhotoRepository;
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
-    private final DailyUpdateService dailyUpdateService;
 
     @Autowired
-    public PostService(PostRepository postRepository, PostPhotoRepository postPhotoRepository, LikeRepository likeRepository, UserRepository userRepository, DailyUpdateService dailyUpdateService) {
+    public PostService(PostRepository postRepository, PostPhotoRepository postPhotoRepository, LikeRepository likeRepository, UserRepository userRepository) {
         this.likeRepository = likeRepository;
         this.postRepository = postRepository;
         this.postPhotoRepository = postPhotoRepository;
         this.userRepository = userRepository;
-        this.dailyUpdateService = dailyUpdateService;
     }
 
-    public String getCurrentDate() {
-        return dailyUpdateService.getCurrentDateString();
-    }
 
     // 게시글 리스트 불러오기 : PostRepo, PostPhotoRepo, LikeRepo
     public List<GetBoardResponse> getBoardResponses(Long challengeId, Long userId) {
@@ -102,7 +99,12 @@ public class PostService {
         Post post = new Post();
 
         post.setContent(postBoardRequest.getContent());
-        post.setDate(getCurrentDate());
+
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String currentDateString = currentDate.format(formatter);
+
+        post.setDate(currentDateString);
         post.setChallengeId(postBoardRequest.getChallengeId());
         post.setUserId(postBoardRequest.getUserId());
 

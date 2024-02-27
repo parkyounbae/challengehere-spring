@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Service
-@EnableScheduling
 public class DailyUpdateService {
 
     private String currentDateString;
